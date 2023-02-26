@@ -19,12 +19,12 @@ volatile int bitcount = 0; //Keep track of bits received
 static void isr_handler(void *arg)
 {
     uint32_t gpio_num = (uint32_t) arg;
-    if (gpio_num == pinD1) //swap these back
+    if (gpio_num == pinD0)
     {
         bitcount++; //Increment bitstream length
         bitstream = bitstream << 1; //Shift left, adding 0 to LSB
     }
-    else if (gpio_num == pinD0) //swap these back
+    else if (gpio_num == pinD1)
     {
         bitcount++; //Increment bitstream length
         bitstream = bitstream << 1; //Shift left, adding 0 to LSB
@@ -41,7 +41,7 @@ static void gpio_task_example(void* arg)
             printf("Bitcount: %i, Bitstream: %llx\n", bitcount, bitstream);
             if (bitcount == 34)
             {
-                bitstream = 0x1FFFFFFFF; //remove this later, forces bitstream to be a specific value
+                //bitstream = 0x1FFFFFFFF; //remove this later, forces bitstream to be a specific value
                 bool even; //Even bit
                 bool odd; //Odd bit
                 uint16_t higher; //16 higher bits
@@ -90,15 +90,13 @@ static void gpio_task_example(void* arg)
                 {
                     uint32_t card_serial_num = (bitstream >> 1) & 0xFFFFFFFF; //Discard even and odd parity bits
                     printf("Card serial number : %lu, %lx\n", card_serial_num, card_serial_num);
-                    bitstream = 0;
-                    bitcount = 0;
                 }
                 else //If either checks fail
                 {
                     printf("Error reading bitstream.");
-                    bitstream = 0;
-                    bitcount = 0;
                 }
+                bitstream = 0; //Reset bitstream
+                bitcount = 0; //Reset bitcount
             }
         }
     }
